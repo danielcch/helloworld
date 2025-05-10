@@ -69,8 +69,9 @@ pipeline {
                                 java -jar /tools/wiremock/wiremock-standalone-2.27.2.jar --port $PORT_WIREMOCK --root-dir /tools/wiremock/ -v &
                                 WIREMOCK_PID=$!
                                 trap 'kill $FLASK_PID $WIREMOCK_PID || true' EXIT
-                                for i in {1..1000}; do curl -s http://localhost:$PORT_FLASK && break || sleep 1; done
-                                for i in {1..1000}; do curl -s http://localhost:$PORT_WIREMOCK && break || sleep 1; done
+
+                                timeout 120 bash -c "until curl -s http://localhost:$PORT_FLASK> /dev/null; do sleep 2; done"
+                                timeout 120 bash -c "until curl -s http://localhost:$PORT_WIREMOCK > /dev/null; do sleep 2; done"
                                 
                                 export BASE_URL_ENV=http://localhost:$PORT_FLASK
                                 export BASE_URL_MOCK_ENV=http://localhost:$PORT_WIREMOCK
