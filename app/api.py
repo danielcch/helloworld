@@ -9,6 +9,13 @@ CALCULATOR = Calculator()
 api_application = Flask(__name__)
 HEADERS = {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"}
 
+contador = 0
+
+@api.route("/sumar")
+def sumar():
+    global contador
+    contador += 1
+    return str(contador)
 
 @api_application.route("/")
 def hello():
