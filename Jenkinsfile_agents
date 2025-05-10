@@ -6,7 +6,7 @@ pipeline {
            agent { label 'git' }
             steps {
                 echo "Hacemos Checkout"
-                git branch: 'feature_fix_racecond', url: 'https://github.com/danielcch/helloworld.git'
+                git url: 'https://github.com/danielcch/helloworld.git'
                 sh '''
                     whoami
                     hostname
