@@ -3,46 +3,55 @@ pipeline {
 
     stages {
         stage('Get Code') {
-            agent { label 'git' }
+           agent { label 'git' }
             steps {
                 echo "Hacemos Checkout"
-                git 'https://github.com/danielcch/helloworld.git'
+                git url: 'https://github.com/danielcch/helloworld.git'
                 sh '''
                     whoami
                     hostname
                 '''
-                stash name: 'resultados', includes: 'result*.xml'
+                stash name: 'codigo', includes: '**/*'
             }
         }
+
         stage('Build') {
             agent { label 'build' }
-            unstash 'resultados'
             steps {
-                echo "Etapa construccion: No se compila nada de monto en python"
+                unstash 'codigo'
+                echo "Etapa construcción: No se compila nada de monto en python"
                 sh '''
                     whoami
                     hostname
                 '''
+                stash name: 'build',includes: '**/*'
             }
-            stash name: 'resultados', includes: 'result*.xml'
         }
+
         stage('Test') {
-            agent { label 'tests' }
-            unstash 'resultados'
-            parallel{
+            parallel {
                 stage('Unit') {
+                    agent { label 'tests' }
                     steps {
+                        unstash 'build'
                         sh '''
                             whoami
                             hostname
                             export PYTHONPATH=.
                             export FLASK_APP=app/api.py:api_application
-                            pytest --junitxml=result-unint.xml test/unit
+                            pytest --junitxml=result-unit.xml test/unit
                         '''
                     }
-                }// fin Unit
+                    post {
+                        always {
+                            stash name: 'results-unit', includes: 'result-*.xml', allowEmpty: true
+                        }
+                    }
+                }//fin unit
                 stage('Service') {
+                    agent { label 'tests' }
                     steps {
+                        unstash 'build'
                         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                             sh '''
                                 whoami
@@ -65,19 +74,20 @@ pipeline {
                             '''
                         }
                     }
-                } //fin Service
-            }// fin parallel
-            post {
-                always {
-                    // 3) Vuelves a stashear **todos** los XML de prueba
-                    stash name: 'resultados', includes: 'result-*.xml'
+                    post {
+                        always {
+                            stash name: 'results-rest', includes: 'result-*.xml', allowEmpty: true
+                        }
+                    }
                 }
-            }//fin post
-        }// fin Test
-        stage ('Results') {
+            }
+        }
+
+        stage('Results') {
             agent { label 'results' }
-            unstash 'resultados'
             steps {
+                unstash 'results-unit'
+                unstash 'results-rest'
                 sh '''
                     whoami
                     hostname
@@ -85,5 +95,5 @@ pipeline {
                 junit 'result*.xml'
             }
         }
-    }//fin stages
+    }
 }
