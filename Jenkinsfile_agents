@@ -72,7 +72,7 @@ pipeline {
                                 for i in {1..100}; do curl -s http://localhost:$PORT_FLASK && break || sleep 1; done
                                 for i in {1..100}; do curl -s http://localhost:$PORT_WIREMOCK && break || sleep 1; done
                                 
-                                until curl -s -o /dev/null http://localhost:54091; do
+                                until curl -s -o /dev/null "http://localhost:$PORT_WIREMOCK"; do
                                     echo "⌛ Esperando a que el servicio esté disponible en http://localhost:54091..."
                                     sleep 1
                                 done
