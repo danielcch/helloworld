@@ -10,6 +10,7 @@ pipeline {
                 sh '''
                     whoami
                     hostname
+                    echo ${WORKSPACE}
                 '''
                 stash name: 'codigo', includes: '**/*'
             }
@@ -23,6 +24,7 @@ pipeline {
                 sh '''
                     whoami
                     hostname
+                    echo ${WORKSPACE}
                 '''
                 stash name: 'build',includes: '**/*'
             }
@@ -37,6 +39,7 @@ pipeline {
                         sh '''
                             whoami
                             hostname
+                            echo ${WORKSPACE}
                             export PYTHONPATH=.
                             export FLASK_APP=app/api.py:api_application
                             pytest --junitxml=result-unit.xml test/unit
@@ -56,6 +59,7 @@ pipeline {
                             sh '''
                                 whoami
                                 hostname
+                                echo ${WORKSPACE}
                                 export PYTHONPATH=.
                                 export FLASK_APP=app/api.py:api_application
                                 PORT_FLASK=$(python3 -c "import socket; s=socket.socket(); s.bind(('',0)); print(s.getsockname()[1]); s.close()")
@@ -91,6 +95,7 @@ pipeline {
                 sh '''
                     whoami
                     hostname
+                    echo ${WORKSPACE}
                 '''
                 junit 'result*.xml'
             }
