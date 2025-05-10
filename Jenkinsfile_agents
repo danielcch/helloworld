@@ -40,12 +40,6 @@ pipeline {
                             whoami
                             hostname
                             echo ${WORKSPACE}
-                            # Simular condición de carrera escribiendo en un archivo compartido
-                            echo "Proceso escribiendo desde $HOSTNAME (Service)" >> /tmp/log_concurrente.txt
-                            for i in {1..50}; do
-                                echo "Service-$HOSTNAME - línea $i" >> /tmp/log_concurrente.txt &
-                            done
-                            wait
                             export PYTHONPATH=.
                             export FLASK_APP=app/api.py:api_application
                             pytest --junitxml=result-unit.xml test/unit
@@ -77,12 +71,6 @@ pipeline {
                                 trap 'kill $FLASK_PID $WIREMOCK_PID || true' EXIT
                                 for i in {1..100}; do curl -s http://localhost:$PORT_FLASK && break || sleep 1; done
                                 for i in {1..100}; do curl -s http://localhost:$PORT_WIREMOCK && break || sleep 1; done
-                                # Simular condición de carrera escribiendo en un archivo compartido
-                                echo "Proceso escribiendo desde $HOSTNAME (Service)" >> /tmp/log_concurrente.txt
-                                for i in {1..50}; do
-                                    echo "Service-$HOSTNAME - línea $i" >> /tmp/log_concurrente.txt &
-                                done
-                                wait
                                 export BASE_URL_ENV=http://localhost:$PORT_FLASK
                                 export BASE_URL_MOCK_ENV=http://localhost:$PORT_WIREMOCK
                                 pytest --junitxml=result-unint-rest.xml test/rest
