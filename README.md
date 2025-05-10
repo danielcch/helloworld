@@ -28,3 +28,6 @@ flask run
 # Pruebas unitarias
 pytest test/unit
 pytest test/rest
+
+# wiremock
+java -jar wiremock-standalone-2.27.2.jar --port 9090 --root-dir . -v
